@@ -1,0 +1,87 @@
+#!/bin/bash
+
+time_to_exit()
+{
+  echo -e "\n\nGood Bye.\n"
+  exit 1
+}
+
+mainmenu()
+{
+while :
+ do
+    echo "[VMS]"
+    echo "Please Select:"
+    echo "  1.Create Account"
+    echo "  2.Query Account"
+    echo "  3.Rent Video"
+    echo "  4.Return Video"
+    echo "  0.Quit"
+    read mn
+    case $mn in
+      1) create; echo "Press Enter"; read ;;
+      2) query; echo "Press Enter"; read ;;
+      3) rent; echo "Press Enter"; read ;;
+      4) return; echo "Press Enter"; read ;;
+      0) exit 0 ;;
+      *) echo "Please select choice 1,2,3,4, or 0";
+         echo "Press Enter" ; read ;;
+ esac
+done
+}
+
+create()
+{
+  echo "[1] Create Account"
+  echo "Enter Customer Info:"
+  read -p '  Name: ' name
+  read -p '  Phone Number: ' phone
+  touch $name
+  echo "Name: $name" >> $name
+  echo "Phone Number: $phone" >> $name
+}
+
+query()
+{
+  echo "[2] Query Account"
+  read -p 'Enter Name: ' name
+  echo "Videos Rented"
+  echo "================================"
+  cat $name'list' | nl -w 1 -s ". "
+  echo "================================"
+}
+
+rent()
+{
+  echo "[3] Rent Video"
+  read -p 'Enter Name: ' name
+  echo "Videos Available"
+  echo "================================"
+  cat video | nl -w 1 -s ". "
+  echo "================================"
+  read -p 'Please Select Number: ' vn
+  vr=$(sed -n "$vn"p video)
+  touch $name'list'
+  dt=$(date +%m/%d)
+  echo -e "$vr\t$dt" >> $name'list'
+  echo "$vr is rented now."
+}
+
+return()
+{
+  echo "[4] Return Video"
+  read -p 'Enter Name: ' name
+  echo "Videos Rented"
+  echo "================================"
+  cat $name'list' | nl -w 1 -s ". "
+  echo "================================"
+  read -p 'Please Select Number: ' vn
+  vr=$(cat $name'list' | cut -f 1 -d$'\t' | sed -n "$vn"p)
+  echo "$vr is returned."
+  sed -i "$vn"d $name'list'
+}
+
+### main ###
+trap time_to_exit INT
+
+mainmenu
